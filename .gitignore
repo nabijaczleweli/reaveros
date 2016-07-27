@@ -1,0 +1,7 @@
+*.d
+*.o
+*.color_coded
+*.ycm_*
+tools
+*.EFI
+*.ELF
