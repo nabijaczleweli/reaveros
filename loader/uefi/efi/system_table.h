@@ -1,7 +1,7 @@
 /**
  * Reaver Project OS, Rose, Licence
  *
- * Copyright © 2016-2017 Michał "Griwes" Dominiak
+ * Copyright © 2017 Michał "Griwes" Dominiak
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -22,24 +22,34 @@
 
 #pragma once
 
+#include "types.h"
+
 namespace efi_loader
 {
-struct EFI_DEVICE_PATH_PROTOCOL;
+struct EFI_SIMPLE_TEXT_INPUT_PROTOCOL;
+struct EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL;
 
-class path
+struct EFI_RUNTIME_SERVICES;
+struct EFI_BOOT_SERVICES;
+
+struct EFI_CONFIGURATION_TABLE;
+
+struct EFI_SYSTEM_TABLE
 {
-public:
-    path(EFI_DEVICE_PATH_PROTOCOL *);
-    ~path();
+    EFI_TABLE_HEADER header;
+    char16_t * firmware_vendor;
+    std::uint32_t firmware_revision;
+    EFI_HANDLE con_in_handle;
+    EFI_SIMPLE_TEXT_INPUT_PROTOCOL * con_in;
+    EFI_HANDLE con_out_handle;
+    EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL * con_out;
+    EFI_HANDLE stderr_handle;
+    EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL * stderr;
 
-    path(const path &) = delete;
-    path(path &&) = default;
-    path & operator=(const path &) = delete;
-    path & operator=(path &&) = default;
+    EFI_RUNTIME_SERVICES * runtime_services;
+    EFI_BOOT_SERVICES * boot_services;
 
-    void print() const;
-
-private:
-    char16_t * _buffer;
+    std::size_t number_of_table_entries;
+    EFI_CONFIGURATION_TABLE * configuration_table;
 };
 }

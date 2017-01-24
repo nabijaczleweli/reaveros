@@ -1,7 +1,7 @@
 /**
  * Reaver Project OS, Rose, Licence
  *
- * Copyright © 2016-2017 Michał "Griwes" Dominiak
+ * Copyright © 2017 Michał "Griwes" Dominiak
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -22,24 +22,48 @@
 
 #pragma once
 
+#include <cstddef>
+#include <cstdint>
+
 namespace efi_loader
 {
-struct EFI_DEVICE_PATH_PROTOCOL;
+using EFI_HANDLE = void *;
+using EFI_STATUS = std::size_t;
 
-class path
+struct EFI_GUID
 {
-public:
-    path(EFI_DEVICE_PATH_PROTOCOL *);
-    ~path();
+    std::uint32_t data1;
+    std::uint16_t data2;
+    std::uint16_t data3;
+    std::uint8_t data4[8];
+};
 
-    path(const path &) = delete;
-    path(path &&) = default;
-    path & operator=(const path &) = delete;
-    path & operator=(path &&) = default;
+struct EFI_TABLE_HEADER
+{
+    std::uint64_t signature;
+    std::uint32_t revision;
+    std::uint32_t header_size;
+    std::uint32_t crc32;
+    std::uint32_t reserved;
+};
 
-    void print() const;
-
-private:
-    char16_t * _buffer;
+enum class EFI_MEMORY_TYPE
+{
+    efi_reserved_memory_type,
+    efi_loader_code,
+    efi_loader_data,
+    efi_boot_services_code,
+    efi_boot_services_data,
+    efi_runtime_services_code,
+    efi_runtime_services_data,
+    efi_conventional_memory,
+    efi_unusable_memory,
+    efi_acpi_reclaim_memory,
+    efi_acpi_memory_nvs,
+    efi_memory_mapped_io,
+    efi_memory_mapped_io_port_space,
+    efi_pal_code,
+    efi_persistent_memory,
+    efi_max_memory_type
 };
 }

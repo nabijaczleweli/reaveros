@@ -4,16 +4,14 @@ OBJCOPY = ../../tools/bin/x86_64-w64-mingw32-objcopy
 CXXFLAGS += -Os -Wall -std=c++1z -stdlib=libc++ -MD -fPIC -Wno-unused-parameter -g -Wno-unused-variable \
 	-Wall -Wextra -Wpedantic -Werror -Weffc++ -Wno-unused-variable -Wno-unused-parameter \
 	\
-	-isystem ../../deps/gnu-efi/inc -isystem ../../deps/gnu-efi/inc/x86_64 -isystem ../../deps/gnu-efi/inc/protocol \
-	-DHAVE_USE_MS_ABI \
 	-ffreestanding -fno-exceptions -fno-rtti -fshort-wchar -nostdlib \
 	-mno-sse -mno-sse2 -mno-sse3 -mno-sse4 -mno-avx -mno-red-zone
 LDFLAGS += -nostdlib -Bsymbolic
-TARGETFLAGS += -target x86_64-elf
+TARGETFLAGS += -target x86_64-linux-elf
 
-CRT0 = ../../deps/gnu-efi/x86_64/gnuefi/crt0-efi-x86_64.o
-LDS = ../../deps/gnu-efi/gnuefi/elf_x86_64_efi.lds
-LIBRARIES = ../../deps/gnu-efi/x86_64/gnuefi/libgnuefi.a
+CRT0 = crt0.o
+LDS = loader.lds
+LIBRARIES = 
 
 SOURCES := $(shell find . -name "*.cpp" ! -wholename "./tests/*")
 TESTSRC := $(shell find ./tests/ -name "*.cpp")
@@ -26,8 +24,8 @@ INTERMEDIATE = BOOTX64.ELF
 
 all: $(EXECUTABLE)
 
-$(INTERMEDIATE): $(OBJECTS)
-	$(LD) $(LDFLAGS) $(CRT0) -T $(LDS) $(OBJECTS) -o $@ $(LIBRARIES)
+$(INTERMEDIATE): $(OBJECTS) $(CRT0)
+	$(LD) $(LDFLAGS) -T $(LDS) $(CRT0) $(OBJECTS) -o $@ $(LIBRARIES)
 
 $(EXECUTABLE): $(INTERMEDIATE)
 	$(OBJCOPY) -j .text -j .sdata -j .data -j .dynamic -j .dynsym -j .rel -j .rela -j .reloc \
@@ -46,6 +44,9 @@ test: ./tests/test
 %.o: %.cpp
 	$(CXX) -c $(CXXFLAGS) $< -o $@ $(TARGETFLAGS)
 
+$(CRT0): crt0.asm
+	yasm crt0.asm -f elf64 -o $(CRT0)
+
 ./tests/%.o: ./tests/%.cpp
 	$(CXX) -c $(CXXFLAGS) $< -o $@
 
@@ -54,6 +55,7 @@ clean:
 	@find . -name "*.d" -delete
 	@rm -f $(EXECUTABLE)
 	@rm -f tests/test
+	@rm -f $(CRT0)
 
 .PHONY: clean test
 

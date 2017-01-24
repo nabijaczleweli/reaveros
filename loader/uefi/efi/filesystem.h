@@ -1,7 +1,7 @@
 /**
  * Reaver Project OS, Rose, Licence
  *
- * Copyright © 2016 Michał "Griwes" Dominiak
+ * Copyright © 2016-2017 Michał "Griwes" Dominiak
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -22,18 +22,16 @@
 
 #pragma once
 
-#include <efi.h>
-
-#include "path.h"
 #include "../cpu/cpuid.h"
+#include "../efi/types.h"
+#include "path.h"
 
 namespace efi_loader
 {
-    class file_buffer;
+class file_buffer;
 
-    path locate_source_directory(EFI_HANDLE);
-    file_buffer load_file(const path &);
-    file_buffer load_kernel(const path &, const cpu_capabilities &);
-    file_buffer load_initrd(const path &, const cpu_capabilities &);
+path locate_source_directory(EFI_HANDLE);
+file_buffer load_file(const path &);
+file_buffer load_kernel(const path &, const cpu_capabilities &);
+file_buffer load_initrd(const path &, const cpu_capabilities &);
 }
-

@@ -1,7 +1,7 @@
 /**
  * Reaver Project OS, Rose, Licence
  *
- * Copyright © 2016 Michał "Griwes" Dominiak
+ * Copyright © 2016-2017 Michał "Griwes" Dominiak
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -25,44 +25,45 @@
 #include <cstddef>
 #include <utility>
 
-#include <reaver/unit.h>
 #include <reaver/swallow.h>
+#include <reaver/unit.h>
 
 namespace efi_loader
 {
-    namespace console
+namespace console
+{
+    void initialize();
+    void clear();
+
+    void print(const char16_t *);
+    void print(std::size_t);
+    void print(void *);
+
+    inline void print(char16_t * str)
     {
-        void initialize();
-        void clear();
+        print(static_cast<const char16_t *>(str));
+    }
 
-        void print(const char16_t *);
-        void print(std::size_t);
-        void print(void *);
+    template<typename T>
+    void print(T * ptr)
+    {
+        print(reinterpret_cast<void *>(ptr));
+    }
 
-        // terrible, terrible hack
-#ifndef CHAR16
-#define CHAR16 unsigned short
-#endif
-        inline void print(CHAR16 * str)
-        {
-            print(reinterpret_cast<char16_t *>(str));
-        }
+    inline void print()
+    {
+    }
 
-        template<typename T>
-        void print(T * ptr)
-        {
-            print(reinterpret_cast<void *>(ptr));
-        }
+    template<typename T, typename = decltype(std::declval<T &&>().print())>
+    void print(T && t)
+    {
+        std::forward<T>(t).print();
+    }
 
-        inline void print()
-        {
-        }
-
-        template<typename... Ts>
-        void print(Ts &&... ts)
-        {
-            reaver::swallow{ (print(std::forward<Ts>(ts)), reaver::unit{})... };
-        }
+    template<typename... Ts>
+    void print(Ts &&... ts)
+    {
+        reaver::swallow{ (print(std::forward<Ts>(ts)), reaver::unit{})... };
     }
 }
-
+}

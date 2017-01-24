@@ -1,7 +1,7 @@
 /**
  * Reaver Project OS, Rose, Licence
  *
- * Copyright © 2016 Michał "Griwes" Dominiak
+ * Copyright © 2016-2017 Michał "Griwes" Dominiak
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -20,42 +20,43 @@
  *
  **/
 
-#include "efi.h"
 #include "filesystem.h"
 #include "console.h"
+#include "efi.h"
+#include "path.h"
 
-using EFI_DEVICE_PATH_TO_TEXT_NODE = CHAR16 * (EFIAPI *)(
-    IN CONST EFI_DEVICE_PATH * DeviceNode,
-    IN BOOLEAN DisplayOnly,
-    IN BOOLEAN AllowShortcuts
-);
-
-using EFI_DEVICE_PATH_TO_TEXT_PATH = CHAR16 * (EFIAPI *)(
-    IN CONST EFI_DEVICE_PATH * DeviceNode,
-    IN BOOLEAN DisplayOnly,
-    IN BOOLEAN AllowShortcuts
-);
-
-struct EFI_DEVICE_PATH_TO_TEXT
+namespace efi_loader
 {
-    EFI_DEVICE_PATH_TO_TEXT_NODE ConvertDeviceNodeToText;
-    EFI_DEVICE_PATH_TO_TEXT_PATH ConvertDevicePathToText;
+constexpr auto EFI_LOADED_IMAGE_PROTOCOL_GUID =
+    EFI_GUID{ 0x5b1b31a1, 0x9562, 0x11d2, { 0x8e, 0x3f, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b } };
+
+struct EFI_DEVICE_PATH_PROTOCOL;
+using EFI_IMAGE_UNLOAD = void (*)();
+
+struct EFI_LOADED_IMAGE_PROTOCOL
+{
+    std::uint32_t revision;
+    EFI_HANDLE parent_handle;
+    EFI_SYSTEM_TABLE * system_table;
+    EFI_HANDLE device_handle;
+    EFI_DEVICE_PATH_PROTOCOL * file_path;
+    void * reserved;
+    std::uint32_t load_options_size;
+    void * load_options;
+    void * image_base;
+    std::uint64_t image_size;
+    EFI_MEMORY_TYPE image_code_type;
+    EFI_MEMORY_TYPE image_data_type;
+    EFI_IMAGE_UNLOAD unload;
 };
 
-#define DEVICE_PATH_TO_TEXT_PROTOCOL \
-    { 0x8b843e20, 0x8132, 0x4852, { 0x90, 0xcc, 0x55, 0x1a, 0x4e, 0x4a, 0x7f, 0x1c } }
-
-efi_loader::path efi_loader::locate_source_directory(EFI_HANDLE image_handle)
+path locate_source_directory(EFI_HANDLE image_handle)
 {
     auto loaded_image = FIND_PROTOCOL_FROM_HANDLE(image_handle, LOADED_IMAGE);
     console::print(u" > LOADED_IMAGE protocol found.\n\r");
 
-    auto to_text = FIND_PROTOCOL(DEVICE_PATH_TO_TEXT);
-    console::print(u" > DEVICE_PATH_TO_TEXT protocol found.\n\r");
-
-    auto path = to_text->ConvertDevicePathToText(loaded_image->FilePath, false, false);
-    console::print(u" > Loaded image path: ", path, u"\n\r");
-
-    return {};
+    auto image_path = path{ loaded_image->file_path };
+    console::print(u" > Loaded image path: ", image_path, u"\n\r");
+    return image_path;
 }
-
+}

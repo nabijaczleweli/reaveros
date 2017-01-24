@@ -1,7 +1,7 @@
 /**
  * Reaver Project OS, Rose, Licence
  *
- * Copyright © 2016 Michał "Griwes" Dominiak
+ * Copyright © 2016-2017 Michał "Griwes" Dominiak
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -20,21 +20,24 @@
  *
  **/
 
-#include "efi/efi.h"
-#include "efi/console.h"
-#include "cpu/cpuid.h"
-#include "efi/filesystem.h"
 #include "config.h"
-#include "video/mode.h"
+#include "cpu/cpuid.h"
+#include "efi/console.h"
+#include "efi/efi.h"
+#include "efi/filesystem.h"
+#include "efi/system_table.h"
 #include "memory/map.h"
+#include "video/mode.h"
 
-extern "C" EFI_STATUS efi_main(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE * system_table)
+extern "C" efi_loader::EFI_STATUS efi_main(efi_loader::EFI_HANDLE image_handle,
+    efi_loader::EFI_SYSTEM_TABLE * system_table)
 {
-    if (system_table->Hdr.Signature != EFI_SYSTEM_TABLE_SIGNATURE)
+    if (system_table->header.signature != efi_loader::EFI_SYSTEM_TABLE_SIGNATURE)
     {
         // need a better way to handle this
         // probably also need a crc32 check, but fuck that right now
-        asm volatile ("cli; hlt");
+        *(volatile uint64_t *)nullptr = 0xdeadc0de;
+        asm volatile("cli; hlt");
     }
 
     efi_loader::initialize(system_table, image_handle);
@@ -42,7 +45,7 @@ extern "C" EFI_STATUS efi_main(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE * syste
 
     efi_loader::console::print(u"ReaverOS UEFI bootloader\n\r");
     efi_loader::console::print(u"Version 0.0.1 alpha, codename \"Cotyledon\"\n\r");
-    efi_loader::console::print(u"Copyright (C) 2016 Reaver Project Team\n\n\r");
+    efi_loader::console::print(u"Copyright (C) 2016-2017 Reaver Project Team\n\n\r");
 
     efi_loader::console::print(u"[CPU] Checking CPU capabilities...\n\r");
     auto cpu_caps = efi_loader::detect_cpu();
@@ -69,6 +72,6 @@ extern "C" EFI_STATUS efi_main(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE * syste
     efi_loader::console::print(u"[GFX] Setting video mode...\n\r");
     efi_loader::console::print(u"[EFI] Bootloader done. Giving up EFI boot services and invoking the kernel.\n\r");*/
 
-    for (;;) ;
+    for (;;)
+        ;
 }
-

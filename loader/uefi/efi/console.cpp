@@ -1,7 +1,7 @@
 /**
  * Reaver Project OS, Rose, Licence
  *
- * Copyright © 2016 Michał "Griwes" Dominiak
+ * Copyright © 2016-2017 Michał "Griwes" Dominiak
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -20,24 +20,54 @@
  *
  **/
 
-#include "efi.h"
 #include "console.h"
+#include "efi.h"
+#include "system_table.h"
 
-void efi_loader::console::initialize()
+namespace efi_loader
 {
-    system_table->ConOut->Reset(system_table->ConOut, false);
+using EFI_TEXT_RESET = EFI_STATUS (*)(EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL * self, bool extended_verification);
+using EFI_TEXT_STRING = EFI_STATUS (*)(EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL * self, const char16_t * string);
+
+using EFI_TEXT_TEST_STRING = void (*)();
+using EFI_TEXT_QUERY_MODE = void (*)();
+using EFI_TEXT_SET_MODE = void (*)();
+using EFI_TEXT_SET_ATTRIBUTE = void (*)();
+
+using EFI_TEXT_CLEAR_SCREEN = EFI_STATUS (*)(EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL * self);
+
+using EFI_TEXT_SET_CURSOR_POSITION = void (*)();
+using EFI_TEXT_ENABLE_CURSOR = void (*)();
+
+struct SIMPLE_TEXT_OUTPUT_MODE;
+
+struct EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL
+{
+    EFI_TEXT_RESET reset;
+    EFI_TEXT_STRING output_string;
+    EFI_TEXT_TEST_STRING test_string;
+    EFI_TEXT_QUERY_MODE query_mode;
+    EFI_TEXT_SET_MODE set_mode;
+    EFI_TEXT_SET_ATTRIBUTE set_attribute;
+    EFI_TEXT_CLEAR_SCREEN clear_screen;
+    EFI_TEXT_SET_CURSOR_POSITION set_cursor_position;
+    EFI_TEXT_ENABLE_CURSOR enable_cursor;
+    SIMPLE_TEXT_OUTPUT_MODE * mode;
+};
+
+void console::initialize()
+{
+    system_table->con_out->reset(system_table->con_out, false);
     clear();
 }
 
-void efi_loader::console::clear()
+void console::clear()
 {
-    system_table->ConOut->ClearScreen(system_table->ConOut);
+    system_table->con_out->clear_screen(system_table->con_out);
 }
 
-void efi_loader::console::print(const char16_t * str)
+void console::print(const char16_t * str)
 {
-    // the following casts away const qualifiers
-    // the EFI API is very very very bad
-    system_table->ConOut->OutputString(system_table->ConOut, (CHAR16 *)(str));
+    system_table->con_out->output_string(system_table->con_out, str);
 }
-
+}
