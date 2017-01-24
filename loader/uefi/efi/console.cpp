@@ -26,15 +26,15 @@
 
 namespace efi_loader
 {
-using EFI_TEXT_RESET = EFI_STATUS (*)(EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL * self, bool extended_verification);
-using EFI_TEXT_STRING = EFI_STATUS (*)(EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL * self, const char16_t * string);
+using EFI_TEXT_RESET = EFIAPI EFI_STATUS (*)(EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL * self, bool extended_verification);
+using EFI_TEXT_STRING = EFIAPI EFI_STATUS (*)(EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL * self, const char16_t * string);
 
 using EFI_TEXT_TEST_STRING = void (*)();
 using EFI_TEXT_QUERY_MODE = void (*)();
 using EFI_TEXT_SET_MODE = void (*)();
 using EFI_TEXT_SET_ATTRIBUTE = void (*)();
 
-using EFI_TEXT_CLEAR_SCREEN = EFI_STATUS (*)(EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL * self);
+using EFI_TEXT_CLEAR_SCREEN = EFIAPI EFI_STATUS (*)(EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL * self);
 
 using EFI_TEXT_SET_CURSOR_POSITION = void (*)();
 using EFI_TEXT_ENABLE_CURSOR = void (*)();

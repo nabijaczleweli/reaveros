@@ -68,7 +68,7 @@ constexpr auto EFI_OPEN_PROTOCOL_BY_CHILD_CONTROLLER = 0x00000008;
 constexpr auto EFI_OPEN_PROTOCOL_BY_DRIVER = 0x00000010;
 constexpr auto EFI_OPEN_PROTOCOL_EXCLUSIVE = 0x00000020;
 
-using EFI_OPEN_PROTOCOL = EFI_STATUS (*)(EFI_HANDLE handle,
+using EFI_OPEN_PROTOCOL = EFIAPI EFI_STATUS (*)(EFI_HANDLE handle,
     EFI_GUID * protocol,
     void ** interface,
     EFI_HANDLE agent_handle,
@@ -80,7 +80,7 @@ using EFI_OPEN_PROTOCOL_INFORMATION = void (*)();
 using EFI_PROTOCOLS_PER_HANDLE = void (*)();
 using EFI_LOCATE_HANDLE_BUFFER = void (*)();
 
-using EFI_LOCATE_PROTOCOL = EFI_STATUS (*)(EFI_GUID * protocol, void * registration, void ** interface);
+using EFI_LOCATE_PROTOCOL = EFIAPI EFI_STATUS (*)(EFI_GUID * protocol, void * registration, void ** interface);
 
 using EFI_INSTALL_MULTIPLE_PROTOCOL_INTERFACES = void (*)();
 using EFI_UNINSTALL_MULTIPLE_PROTOCOL_INTERFACES = void (*)();

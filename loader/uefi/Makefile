@@ -3,7 +3,7 @@ LD = ../../tools/bin/x86_64-elf-ld
 OBJCOPY = ../../tools/bin/x86_64-w64-mingw32-objcopy
 CXXFLAGS += -Os -Wall -std=c++1z -stdlib=libc++ -MD -fPIC -Wno-unused-parameter -g -Wno-unused-variable \
 	-Wall -Wextra -Wpedantic -Werror -Weffc++ -Wno-unused-variable -Wno-unused-parameter \
-	\
+	-DHAVE_USE_MS_ABI \
 	-ffreestanding -fno-exceptions -fno-rtti -fshort-wchar -nostdlib \
 	-mno-sse -mno-sse2 -mno-sse3 -mno-sse4 -mno-avx -mno-red-zone
 LDFLAGS += -nostdlib -Bsymbolic

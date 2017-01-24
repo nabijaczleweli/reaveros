@@ -36,7 +36,7 @@ extern "C" efi_loader::EFI_STATUS efi_main(efi_loader::EFI_HANDLE image_handle,
     {
         // need a better way to handle this
         // probably also need a crc32 check, but fuck that right now
-        *(volatile uint64_t *)nullptr = 0xdeadc0de;
+        *(volatile uint64_t *)nullptr = 0xdeadbeef;
         asm volatile("cli; hlt");
     }
 
@@ -72,6 +72,7 @@ extern "C" efi_loader::EFI_STATUS efi_main(efi_loader::EFI_HANDLE image_handle,
     efi_loader::console::print(u"[GFX] Setting video mode...\n\r");
     efi_loader::console::print(u"[EFI] Bootloader done. Giving up EFI boot services and invoking the kernel.\n\r");*/
 
+    *(volatile uint64_t *)nullptr = 0xdeadc0de;
     for (;;)
         ;
 }

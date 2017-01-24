@@ -22,6 +22,14 @@
 
 #pragma once
 
+#ifndef EFIAPI
+#ifdef _MSC_EXTENSIONS
+#define EFIAPI __cdecl
+#else
+#define EFIAPI __attribute__((ms_abi))
+#endif
+#endif
+
 #include "types.h"
 
 namespace efi_loader

@@ -26,11 +26,11 @@
 
 namespace efi_loader
 {
-using EFI_DEVICE_PATH_TO_TEXT_NODE = char16_t * (*)(const EFI_DEVICE_PATH_PROTOCOL * device_node,
+using EFI_DEVICE_PATH_TO_TEXT_NODE = EFIAPI char16_t * (*)(const EFI_DEVICE_PATH_PROTOCOL * device_node,
     bool display_only,
     bool allow_shortcuts);
 
-using EFI_DEVICE_PATH_TO_TEXT_PATH = char16_t * (*)(const EFI_DEVICE_PATH_PROTOCOL * device_node,
+using EFI_DEVICE_PATH_TO_TEXT_PATH = EFIAPI char16_t * (*)(const EFI_DEVICE_PATH_PROTOCOL * device_node,
     bool display_only,
     bool allow_shortcuts);
 
