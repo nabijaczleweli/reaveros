@@ -35,9 +35,15 @@ namespace console
     void initialize();
     void clear();
 
+    void print(const char *);
     void print(const char16_t *);
     void print(std::size_t);
     void print(void *);
+
+    inline void print(char * str)
+    {
+        print(static_cast<const char *>(str));
+    }
 
     inline void print(char16_t * str)
     {

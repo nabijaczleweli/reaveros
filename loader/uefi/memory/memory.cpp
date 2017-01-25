@@ -1,7 +1,7 @@
 /**
  * Reaver Project OS, Rose, Licence
  *
- * Copyright © 2016-2017 Michał "Griwes" Dominiak
+ * Copyright © 2017 Michał "Griwes" Dominiak
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -20,22 +20,30 @@
  *
  **/
 
-#pragma once
+#include <cstddef>
+#include <cstdint>
 
-namespace efi_loader
+extern "C" void * memcpy(void * dest, const void * src, std::size_t count)
 {
-enum class cpu_manufacturer
-{
-    intel,
-    amd,
-    unknown
-};
+    auto dest_u8 = reinterpret_cast<std::uint8_t *>(dest);
+    auto src_u8 = reinterpret_cast<const std::uint8_t *>(src);
 
-struct cpu_capabilities
-{
-    cpu_manufacturer manufacturer = cpu_manufacturer::unknown;
-    char brand_string[48] = "Unknown CPU brand";
-};
+    while (count--)
+    {
+        *dest_u8++ = *src_u8++;
+    }
 
-cpu_capabilities detect_cpu();
+    return dest;
+}
+
+extern "C" void * memset(void * dest, int ch, std::size_t count)
+{
+    auto dest_u8 = reinterpret_cast<std::uint8_t *>(dest);
+
+    while (count--)
+    {
+        *dest_u8 = ch;
+    }
+
+    return dest;
 }

@@ -66,6 +66,29 @@ void console::clear()
     system_table->con_out->clear_screen(system_table->con_out);
 }
 
+void console::print(const char * str)
+{
+    char16_t buffer[8192] = { '\0' }; // this is very dumb, but it has to stay for now
+
+    for (int i = 0; i <= 8192; ++i, ++str)
+    {
+        buffer[i] = *str;
+
+        if (!*str)
+        {
+            break;
+        }
+    }
+
+    if (*str)
+    {
+        print(u"[ERR] console::print: tried to print a too long ASCII string\n\r");
+        asm volatile("cli; hlt");
+    }
+
+    print(buffer);
+}
+
 void console::print(const char16_t * str)
 {
     system_table->con_out->output_string(system_table->con_out, str);

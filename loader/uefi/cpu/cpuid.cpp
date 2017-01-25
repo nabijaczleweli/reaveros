@@ -1,7 +1,7 @@
 /**
  * Reaver Project OS, Rose, Licence
  *
- * Copyright © 2016 Michał "Griwes" Dominiak
+ * Copyright © 2016-2017 Michał "Griwes" Dominiak
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -22,47 +22,74 @@
 
 #include <cstdint>
 
-#include "cpuid.h"
 #include "../efi/console.h"
+#include "cpuid.h"
 
-#define cpuid(id, a, b, c, d) \
-    asm volatile("cpuid" : "=a"(a), "=b"(b), "=c"(c), "=d"(d) : "a"(id));
+#define cpuid(id, a, b, c, d) asm volatile("cpuid" : "=a"(a), "=b"(b), "=c"(c), "=d"(d) : "a"(id));
 
 namespace efi_loader
 {
-    cpu_capabilities detect_intel()
-    {
-        cpu_capabilities caps;
-        console::print(u" > Intel CPU detected.\n\r");
-        caps.manufacturer = cpu_manufacturer::intel;
-        return caps;
-    }
+cpu_capabilities detect_intel()
+{
+    cpu_capabilities caps;
+    console::print(u" > Intel CPU detected.\n\r");
+    caps.manufacturer = cpu_manufacturer::intel;
+    return caps;
+}
 
-    cpu_capabilities detect_amd()
+cpu_capabilities detect_amd()
+{
+    cpu_capabilities caps;
+    console::print(u" > AMD CPU detected.\n\r");
+    caps.manufacturer = cpu_manufacturer::amd;
+    return caps;
+}
+
+void detect_brand(cpu_capabilities & caps)
+{
+    auto buf = reinterpret_cast<std::uint32_t *>(caps.brand_string);
+
+    for (auto i = 0x80000002; i <= 0x80000004; ++i)
     {
-        cpu_capabilities caps;
-        console::print(u" > AMD CPU detected.\n\r");
-        caps.manufacturer = cpu_manufacturer::amd;
-        return caps;
+        std::uint64_t registers[4];
+        cpuid(i, registers[0], registers[1], registers[2], registers[3]);
+
+        for (int j = 0; j < 4; ++j)
+        {
+            *buf++ = registers[j] & 0xffffffff;
+        }
     }
 }
 
-efi_loader::cpu_capabilities efi_loader::detect_cpu()
+cpu_capabilities detect_cpu()
 {
     std::uint64_t rbx, _;
     cpuid(0, _, rbx, _, _);
 
-    switch (rbx)
+    auto caps = [&]() -> cpu_capabilities {
+        switch (rbx)
+        {
+            case 0x756e6547:
+                return detect_intel();
+
+            case 0x68747541:
+                return detect_amd();
+
+            default:
+                console::print(u" > Unknown CPU manufacturer detected.\n\r");
+                return {};
+        }
+    }();
+
+    std::uint64_t rax;
+    cpuid(0x80000000, rax, _, _, _);
+    if (rax >= 0x80000004)
     {
-        case 0x756e6547:
-            return detect_intel();
-
-        case 0x68747541:
-            return detect_amd();
-
-        default:
-            console::print(u" > Unknown CPU manufacturer detected.\n\r");
-            return {};
+        detect_brand(caps);
     }
-}
 
+    console::print(u" > CPU brand string: ", caps.brand_string, u"\n\r");
+
+    return caps;
+}
+}

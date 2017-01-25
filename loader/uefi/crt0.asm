@@ -36,6 +36,7 @@ _start:
     push rcx
     push rdx
 
+    ; will start calling this once I really, really need to
     ;call relocate
 
     pop rsi
