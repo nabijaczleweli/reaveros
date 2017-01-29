@@ -22,7 +22,9 @@
 
 #pragma once
 
+#include <climits>
 #include <cstddef>
+#include <type_traits>
 #include <utility>
 
 #include <reaver/swallow.h>
@@ -37,8 +39,44 @@ namespace console
 
     void print(const char *);
     void print(const char16_t *);
-    void print(std::size_t);
     void print(void *);
+
+    template<typename T, typename std::enable_if<std::is_integral<T>::value>::type *...>
+    void print(const T & a)
+    {
+        static_assert(
+            sizeof(T) * CHAR_BIT <= 64, "a bigger-than-64-bit type needs more than 23 characters of a buffer");
+
+        char16_t buffer[22] = { '\0' };
+        auto buffer_ptr = buffer;
+
+        if (a == 0)
+        {
+            buffer[0] = u'0';
+            print(buffer);
+            return;
+        }
+
+        else if (!(a > 0 || a == 0))
+        {
+            *buffer_ptr++ = u'-';
+        }
+
+        auto impl = [&buffer_ptr](auto && self, auto a) -> void {
+            T div = a / 10;
+            T mod = a % 10;
+
+            if (div != 0)
+            {
+                self(self, div);
+            }
+
+            *buffer_ptr++ = u'0' + mod;
+        };
+
+        impl(impl, a);
+        print(buffer);
+    }
 
     inline void print(char * str)
     {
@@ -56,17 +94,13 @@ namespace console
         print(reinterpret_cast<void *>(ptr));
     }
 
-    inline void print()
-    {
-    }
-
     template<typename T, typename = decltype(std::declval<T &&>().print())>
     void print(T && t)
     {
         std::forward<T>(t).print();
     }
 
-    template<typename... Ts>
+    template<typename... Ts, typename std::enable_if<(sizeof...(Ts) > 1)>::type *...>
     void print(Ts &&... ts)
     {
         reaver::swallow{ (print(std::forward<Ts>(ts)), reaver::unit{})... };

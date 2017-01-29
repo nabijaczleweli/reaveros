@@ -53,15 +53,16 @@ extern "C" efi_loader::EFI_STATUS efi_main(efi_loader::EFI_HANDLE image_handle,
     efi_loader::console::print(u"[EFI] Looking for own location...\n\r");
     auto source_directory = efi_loader::locate_source_directory(image_handle);
 
-    /*efi_loader::console::print(u"[DSK] Loading configuration...\n\r");
-    auto config = efi_loader::parse_config(efi_loader::load_file(source_directory / u"reaveros.conf"));
+    efi_loader::console::print(u"[DSK] Loading configuration...\n\r");
+    auto file = efi_loader::load_file(source_directory / u"reaveros.conf");
+    // auto config = efi_loader::parse_config(efi_loader::load_file(source_directory / u"reaveros.conf"));
+
+    /*efi_loader::console::print(u"[GFX] Choosing video mode...\n\r");
+    auto video_mode = efi_loader::choose_mode(config);
 
     efi_loader::console::print(u"[DSK] Loading kernel and initrd...\n\r");
     auto kernel = efi_loader::load_kernel(source_directory, config);
     auto initrd = efi_loader::load_initrd(source_directory, config);
-
-    efi_loader::console::print(u"[GFX] Choosing video mode...\n\r");
-    auto video_mode = efi_loader::choose_mode();
 
     efi_loader::console::print(u"[MEM] Getting memory map...\n\r");
     auto memory_map = efi_loader::get_memory_map();*/

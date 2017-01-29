@@ -22,6 +22,8 @@
 
 #pragma once
 
+#include <climits>
+
 #ifndef EFIAPI
 #ifdef _MSC_EXTENSIONS
 #define EFIAPI __cdecl
@@ -49,7 +51,42 @@ constexpr auto EFI_1_02_SYSTEM_TABLE_REVISION = ((1 << 16) | (02));
 constexpr auto EFI_SYSTEM_TABLE_REVISION = EFI_2_60_SYSTEM_TABLE_REVISION;
 constexpr auto EFI_SPECIFICATION_VERSION = EFI_SYSTEM_TABLE_REVISION;
 
+constexpr auto high_bit = 1ull << (sizeof(EFI_STATUS) * CHAR_BIT - 1);
+
 constexpr auto EFI_SUCCESS = 0;
+constexpr auto EFI_LOAD_ERROR = 1 | high_bit;
+constexpr auto EFI_INVALID_PARAMETER = 2 | high_bit;
+constexpr auto EFI_UNSUPPORTED = 3 | high_bit;
+constexpr auto EFI_BAD_BUFFER_SIZE = 4 | high_bit;
+constexpr auto EFI_BUFFER_TOO_SMALL = 5 | high_bit;
+constexpr auto EFI_NOT_READY = 6 | high_bit;
+constexpr auto EFI_DEVICE_ERROR = 7 | high_bit;
+constexpr auto EFI_WRITE_PROTECTED = 8 | high_bit;
+constexpr auto EFI_OUT_OF_RESOURCES = 9 | high_bit;
+constexpr auto EFI_VOLUME_CORRUPTED = 10 | high_bit;
+constexpr auto EFI_VOLUME_FULL = 11 | high_bit;
+constexpr auto EFI_NO_MEDIA = 12 | high_bit;
+constexpr auto EFI_MEDIA_CHANGED = 13 | high_bit;
+constexpr auto EFI_NOT_FOUND = 14 | high_bit;
+constexpr auto EFI_ACCESS_DENIED = 15 | high_bit;
+constexpr auto EFI_NO_RESPONSE = 16 | high_bit;
+constexpr auto EFI_NO_MAPPING = 17 | high_bit;
+constexpr auto EFI_TIMEOUT = 18 | high_bit;
+constexpr auto EFI_NOT_STARTED = 19 | high_bit;
+constexpr auto EFI_ALREADY_STARTED = 20 | high_bit;
+constexpr auto EFI_ABORTED = 21 | high_bit;
+constexpr auto EFI_ICMP_ERROR = 22 | high_bit;
+constexpr auto EFI_TFTP_ERROR = 23 | high_bit;
+constexpr auto EFI_PROTOCOL_ERROR = 24 | high_bit;
+constexpr auto EFI_INCOMPATIBLE_VERSION = 25 | high_bit;
+constexpr auto EFI_SECURITY_VIOLATION = 26 | high_bit;
+constexpr auto EFI_CRC_ERROR = 27 | high_bit;
+constexpr auto EFI_END_OF_MEDIA = 28 | high_bit;
+constexpr auto EFI_END_OF_FILE = 31 | high_bit;
+constexpr auto EFI_INVALID_LANGUAGE = 32 | high_bit;
+constexpr auto EFI_COMPROMISED_DATA = 33 | high_bit;
+constexpr auto EFI_IP_ADDRESS_CONFLICT = 34 | high_bit;
+constexpr auto EFI_HTTP_ERROR = 35 | high_bit;
 
 struct EFI_SYSTEM_TABLE;
 

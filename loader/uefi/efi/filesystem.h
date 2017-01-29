@@ -22,13 +22,15 @@
 
 #pragma once
 
+#include <memory>
+
 #include "../cpu/cpuid.h"
 #include "../efi/types.h"
 #include "path.h"
 
 namespace efi_loader
 {
-class file_buffer;
+using file_buffer = std::unique_ptr<char[]>;
 
 path locate_source_directory(EFI_HANDLE);
 file_buffer load_file(const path &);

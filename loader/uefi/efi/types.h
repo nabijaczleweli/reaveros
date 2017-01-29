@@ -66,4 +66,19 @@ enum class EFI_MEMORY_TYPE
     efi_persistent_memory,
     efi_max_memory_type
 };
+
+struct EFI_TIME
+{
+    std::uint16_t year;  // 1900 – 9999
+    std::uint8_t month;  // 1 – 12
+    std::uint8_t day;    // 1 – 31
+    std::uint8_t hour;   // 0 – 23
+    std::uint8_t minute; // 0 – 59
+    std::uint8_t second; // 0 – 59
+    std::uint8_t pad1;
+    std::uint32_t nanosecond; // 0 – 999,999,999
+    std::int16_t time_zone;   // -1440 to 1440 or 2047
+    std::uint8_t daylight;
+    std::uint8_t pad2;
+};
 }

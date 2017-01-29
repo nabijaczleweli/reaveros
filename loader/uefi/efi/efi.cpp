@@ -34,8 +34,11 @@ using EFI_RESTORE_TPL = void (*)();
 using EFI_ALLOCATE_PAGES = void (*)();
 using EFI_FREE_PAGES = void (*)();
 using EFI_GET_MEMORY_MAP = void (*)();
-using EFI_ALLOCATE_POOL = void (*)();
-using EFI_FREE_POOL = void (*)();
+
+using EFI_ALLOCATE_POOL = EFIAPI EFI_STATUS (*)(EFI_MEMORY_TYPE memory_pool, std::size_t size, void ** buffer);
+
+using EFI_FREE_POOL = EFIAPI EFI_STATUS (*)(void *);
+
 using EFI_CREATE_EVENT = void (*)();
 using EFI_SET_TIMER = void (*)();
 using EFI_WAIT_FOR_EVENT = void (*)();
@@ -98,7 +101,7 @@ struct EFI_BOOT_SERVICES
 
     EFI_ALLOCATE_PAGES allocate_pages;
     EFI_FREE_PAGES free_pages;
-    EFI_GET_MEMORY_MAP get_memoryMap;
+    EFI_GET_MEMORY_MAP get_memory_map;
     EFI_ALLOCATE_POOL allocate_pool;
     EFI_FREE_POOL free_pool;
 
@@ -158,7 +161,7 @@ void * open_protocol_by_guid(const EFI_GUID & guid)
 
     if (status != EFI_SUCCESS)
     {
-        console::print(u" >> Failed to open protocol. [TODO: print the guid here]\n\r");
+        console::print(u"[ERR] Failed to open protocol. [TODO: print the guid here]\n\r");
         return nullptr;
     }
 
@@ -173,10 +176,50 @@ void * open_protocol_by_guid(EFI_HANDLE handle, const EFI_GUID & guid)
 
     if (status != EFI_SUCCESS)
     {
-        console::print(u" >> Failed to open protocol. [TODO: print the guid here]\n\r");
+        console::print(u"[ERR] Failed to open protocol. [TODO: print the guid here]\n\r");
         return nullptr;
     }
 
     return ret;
 }
+}
+
+void * operator new(std::size_t size)
+{
+    void * ret = nullptr;
+    switch (auto status = efi_loader::system_table->boot_services->allocate_pool(
+                efi_loader::EFI_MEMORY_TYPE::efi_loader_data, size, &ret))
+    {
+        case efi_loader::EFI_SUCCESS:
+            return ret;
+
+        default:
+            efi_loader::console::print(u"[ERR] Error allocating memory: ", status & ~efi_loader::high_bit, u".\n\r");
+            asm volatile("cli; hlt");
+            __builtin_unreachable();
+    }
+}
+
+void * operator new[](std::size_t size)
+{
+    return operator new(size);
+}
+
+void operator delete(void * ptr)
+{
+    switch (auto status = efi_loader::system_table->boot_services->free_pool(ptr))
+    {
+        case efi_loader::EFI_SUCCESS:
+            return;
+
+        default:
+            efi_loader::console::print(u"[ERR] Error freeing memory: ", status & ~efi_loader::high_bit, u".\n\r");
+            asm volatile("cli; hlt");
+            __builtin_unreachable();
+    }
+}
+
+void operator delete[](void * ptr)
+{
+    operator delete(ptr);
 }

@@ -39,7 +39,20 @@ public:
 
     void print() const;
 
+    const char16_t * string() const
+    {
+        return _buffer;
+    }
+
+    path operator/(const char16_t *) const;
+
+    EFI_DEVICE_PATH_PROTOCOL * protocol() const
+    {
+        return _proto;
+    }
+
 private:
     char16_t * _buffer;
+    EFI_DEVICE_PATH_PROTOCOL * _proto;
 };
 }
