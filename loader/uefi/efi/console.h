@@ -24,6 +24,7 @@
 
 #include <climits>
 #include <cstddef>
+#include <string_view>
 #include <type_traits>
 #include <utility>
 
@@ -39,6 +40,7 @@ namespace console
 
     void print(const char *);
     void print(const char16_t *);
+    void print(std::string_view);
     void print(void *);
 
     template<typename T, typename std::enable_if<std::is_integral<T>::value>::type *...>
@@ -105,5 +107,5 @@ namespace console
     {
         reaver::swallow{ (print(std::forward<Ts>(ts)), reaver::unit{})... };
     }
-}
-}
+} // namespace console
+} // namespace efi_loader

@@ -68,29 +68,29 @@ void console::clear()
 
 void console::print(const char * str)
 {
-    char16_t buffer[8192] = { '\0' }; // this is very dumb, but it has to stay for now
-
-    for (int i = 0; i <= 8192; ++i, ++str)
-    {
-        buffer[i] = *str;
-
-        if (!*str)
-        {
-            break;
-        }
-    }
-
-    if (*str)
-    {
-        print(u"[ERR] console::print: tried to print a too long ASCII string\n\r");
-        asm volatile("cli; hlt");
-    }
-
-    print(buffer);
+    print(std::string_view{ str });
 }
 
 void console::print(const char16_t * str)
 {
     system_table->con_out->output_string(system_table->con_out, str);
+}
+
+void console::print(std::string_view str)
+{
+    char16_t buffer[8192] = { '\0' }; // this is very dumb, but it has to stay for now
+
+    if (str.size() > 8191)
+    {
+        print(u"[ERR] console::print: tried to print a too long string view.\n\r");
+        asm volatile("cli; hlt");
+    }
+
+    for (auto i = 0u; i < str.size(); ++i)
+    {
+        buffer[i] = str[i];
+    }
+
+    print(buffer);
 }
 }

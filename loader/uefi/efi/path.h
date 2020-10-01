@@ -22,6 +22,8 @@
 
 #pragma once
 
+#include <string_view>
+
 namespace efi_loader
 {
 struct EFI_DEVICE_PATH_PROTOCOL;
@@ -30,6 +32,7 @@ class path
 {
 public:
     path(EFI_DEVICE_PATH_PROTOCOL *);
+    path(std::string_view);
     ~path();
 
     path(const path &) = delete;
@@ -46,13 +49,7 @@ public:
 
     path operator/(const char16_t *) const;
 
-    EFI_DEVICE_PATH_PROTOCOL * protocol() const
-    {
-        return _proto;
-    }
-
 private:
     char16_t * _buffer;
-    EFI_DEVICE_PATH_PROTOCOL * _proto;
 };
 }

@@ -76,7 +76,8 @@ constexpr auto EFI_FILE_DIRECTORY = 0x0000000000000010;
 constexpr auto EFI_FILE_ARCHIVE = 0x0000000000000020;
 constexpr auto EFI_FILE_VALID_ATTR = 0x0000000000000037;
 
-using EFI_FILE_CLOSE = void (*)();
+using EFI_FILE_CLOSE = EFIAPI EFI_STATUS (*)(EFI_FILE_PROTOCOL * self);
+
 using EFI_FILE_DELETE = void (*)();
 
 using EFI_FILE_READ = EFIAPI EFI_STATUS (*)(EFI_FILE_PROTOCOL * self, std::size_t * buffer_size, void * buffer);
@@ -216,13 +217,14 @@ file_buffer load_file(const path & p)
         case EFI_SUCCESS:
             buffer[size] = '\0';
             console::print(u" > File `", p, u"` loaded.\n\r");
-            console::print(buffer.get(), u"\n\r");
             break;
 
         default:
             console::print(u"[ERR] Loading file `", p, u"` failed: ", status & ~high_bit, u".\n\r");
             asm volatile("cli; hlt");
     }
+
+    file->close(file);
 
     return buffer;
 }

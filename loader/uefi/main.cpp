@@ -20,7 +20,7 @@
  *
  **/
 
-#include "config.h"
+#include "config/config.h"
 #include "cpu/cpuid.h"
 #include "efi/console.h"
 #include "efi/efi.h"
@@ -44,7 +44,7 @@ extern "C" efi_loader::EFI_STATUS efi_main(efi_loader::EFI_HANDLE image_handle,
     efi_loader::console::initialize();
 
     efi_loader::console::print(u"ReaverOS UEFI bootloader\n\r");
-    efi_loader::console::print(u"Version 0.0.1 alpha, codename \"Cotyledon\"\n\r");
+    efi_loader::console::print(u"Version 0.0.0 alpha, codename \"Cotyledon\"\n\r");
     efi_loader::console::print(u"Copyright (C) 2016-2017 Reaver Project Team\n\n\r");
 
     efi_loader::console::print(u"[CPU] Checking CPU capabilities...\n\r");
@@ -54,13 +54,12 @@ extern "C" efi_loader::EFI_STATUS efi_main(efi_loader::EFI_HANDLE image_handle,
     auto source_directory = efi_loader::locate_source_directory(image_handle);
 
     efi_loader::console::print(u"[DSK] Loading configuration...\n\r");
-    auto file = efi_loader::load_file(source_directory / u"reaveros.conf");
-    // auto config = efi_loader::parse_config(efi_loader::load_file(source_directory / u"reaveros.conf"));
+    auto config = efi_loader::config{ efi_loader::load_file(source_directory / u"reaveros.conf") };
 
-    /*efi_loader::console::print(u"[GFX] Choosing video mode...\n\r");
+    efi_loader::console::print(u"[GFX] Choosing video mode...\n\r");
     auto video_mode = efi_loader::choose_mode(config);
 
-    efi_loader::console::print(u"[DSK] Loading kernel and initrd...\n\r");
+    /*efi_loader::console::print(u"[DSK] Loading kernel and initrd...\n\r");
     auto kernel = efi_loader::load_kernel(source_directory, config);
     auto initrd = efi_loader::load_initrd(source_directory, config);
 

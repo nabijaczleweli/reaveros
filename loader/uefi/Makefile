@@ -2,7 +2,7 @@ CXX = clang++
 LD = ../../tools/bin/x86_64-elf-ld
 OBJCOPY = ../../tools/bin/x86_64-w64-mingw32-objcopy
 CXXFLAGS += -Os -Wall -std=c++1z -stdlib=libc++ -MD -fPIC -Wno-unused-parameter -g -Wno-unused-variable \
-	-Wall -Wextra -Wpedantic -Werror -Weffc++ -Wno-unused-variable -Wno-unused-parameter \
+	-Wall -Wextra -Wpedantic -Werror -Weffc++ -Wno-unused-variable -Wno-unused-parameter -Wno-tautological-overlap-compare \
 	-DHAVE_USE_MS_ABI \
 	-ffreestanding -fno-exceptions -fno-rtti -fshort-wchar -nostdlib \
 	-mno-sse -mno-sse2 -mno-sse3 -mno-sse4 -mno-avx -mno-red-zone
@@ -11,7 +11,7 @@ TARGETFLAGS += -target x86_64-linux-elf
 
 CRT0 = crt0.o
 LDS = loader.lds
-LIBRARIES = 
+LIBRARIES =
 
 SOURCES := $(shell find . -name "*.cpp" ! -wholename "./tests/*")
 TESTSRC := $(shell find ./tests/ -name "*.cpp")

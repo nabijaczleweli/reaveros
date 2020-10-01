@@ -90,13 +90,21 @@ namespace
 }
 
 path::path(EFI_DEVICE_PATH_PROTOCOL * device_path)
-    : _buffer{ to_text_init()->convert_device_path_to_text(device_path, false, false) }, _proto{ device_path }
+    : _buffer{ to_text_init()->convert_device_path_to_text(device_path, false, false) }
 {
+}
+
+path::path(std::string_view str) : _buffer{ new char16_t[str.size() + 1]{ '\0' } }
+{
+    for (std::size_t i = 0; i < str.size(); ++i)
+    {
+        _buffer[i] = str[i];
+    }
 }
 
 path::~path()
 {
-    // TODO: free the buffer
+    operator delete[](_buffer);
 }
 
 path path::operator/(const char16_t * append) const
@@ -114,9 +122,14 @@ path path::operator/(const char16_t * append) const
     }
     *buffer_ptr = u'\0';
 
+    // this is fishy
+    // but I think it's not terribly wrong? IDK
+    // at some point I might write a more sane path manipulator thing
+    // that allows removing path segments and so on
+    // but this works well enough right now
     auto proto = from_text_init()->convert_text_to_device_path(buffer);
     auto ret = path(proto);
-    // free the proto
+    operator delete(proto);
     return ret;
 }
 }

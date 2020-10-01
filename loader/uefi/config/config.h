@@ -1,7 +1,7 @@
 /**
  * Reaver Project OS, Rose, Licence
  *
- * Copyright © 2016 Michał "Griwes" Dominiak
+ * Copyright © 2017 Michał "Griwes" Dominiak
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -19,3 +19,25 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  **/
+
+#pragma once
+
+#include <string_view>
+
+#include "../efi/filesystem.h"
+
+namespace efi_loader
+{
+struct config
+{
+public:
+    config(file_buffer config_file) : _config_file{ std::move(config_file) }
+    {
+    }
+
+    std::string_view operator[](std::string_view key) const;
+
+private:
+    file_buffer _config_file;
+};
+}

@@ -1,7 +1,7 @@
 /**
  * Reaver Project OS, Rose, Licence
  *
- * Copyright © 2016 Michał "Griwes" Dominiak
+ * Copyright © 2016-2017 Michał "Griwes" Dominiak
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -19,3 +19,16 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  **/
+
+#pragma once
+
+namespace efi_loader
+{
+struct config;
+
+struct video_mode
+{
+};
+
+video_mode choose_mode(const config & cfg);
+}
