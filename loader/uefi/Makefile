@@ -51,11 +51,8 @@ $(CRT0): crt0.asm
 	$(CXX) -c $(CXXFLAGS) $< -o $@
 
 clean:
-	@find . -name "*.o" -delete
-	@find . -name "*.d" -delete
-	@rm -f $(EXECUTABLE)
-	@rm -f tests/test
-	@rm -f $(CRT0)
+	find . -name "*.[od]" -delete
+	rm -f $(EXECUTABLE) tests/test $(CRT0)
 
 .PHONY: clean test
 
