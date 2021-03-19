@@ -1,16 +1,12 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-if [[ -z "$mkfs" ]]
+if ! command -v "${mkfs_fat:=mkfs.fat}" >/dev/null
 then
-    mkfs_fat=mkfs.fat
-fi
-if ! which $mkfs_fat
-then
-    if [[ -x /sbin/mkfs.fat ]]
+    if [ -x /sbin/mkfs.fat ]
     then
-        mkfs_fat=/sbin/mkfs.fat
+        mkfs_fat="/sbin/mkfs.fat"
     else
-        echo "Can't find mkfs.fat; please install it, or provide via an environment variable $$mkfs_fat."
+        echo 'Can'\''t find mkfs.fat; please install dosfstools, or provide via an environment variable $mkfs_fat.'
         exit 1
     fi
 fi
@@ -19,8 +15,8 @@ set -e
 
 make
 
-dd if=/dev/zero of=fat.img bs=1474560 count=1
-$mkfs_fat fat.img
+fallocate -l 1474560 fat.img
+"$mkfs_fat" fat.img
 mmd -i fat.img EFI EFI/BOOT
 mcopy -o -i fat.img BOOTX64.EFI ::/EFI/BOOT/BOOTX64.EFI
 mcopy -o -i fat.img config/reaveros.conf ::/EFI/BOOT/reaveros.conf
