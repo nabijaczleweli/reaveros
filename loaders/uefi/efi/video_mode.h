@@ -30,4 +30,5 @@ struct video_mode
 };
 
 video_mode choose_mode(const config & cfg);
+void set_mode(const video_mode & mode);
 }

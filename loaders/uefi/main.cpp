@@ -58,6 +58,10 @@ extern "C" efi_loader::EFI_STATUS efi_main(
 
         efi_loader::console::print(u"[GFX] Choosing video mode...\n\r");
         auto video_mode = efi_loader::choose_mode(config);
+        if (video_mode.valid) {
+            efi_loader::console::print(u"[GFX] Setting video mode...\n\r");
+            efi_loader::set_mode(video_mode);
+        }
 
         efi_loader::console::print(u"[DSK] Loading kernel and initrd...\n\r");
         auto kernel = efi_loader::load_file(config["kernel"]);
@@ -73,11 +77,7 @@ extern "C" efi_loader::EFI_STATUS efi_main(
         efi_loader::console::print(u"[CPU] Preparing controlled execution environment structures...\n\r");
         efi_loader::prepare_environment();
 
-        /*efi_loader::console::print(u"[MEM] Preparing paging structures...\n\r");
-        if (video_mode.valid) {
-        efi_loader::console::print(u"[GFX] Will set video mode.\n\r");
-        efi_loader::allocate_pages(video buffer size, 0x80001000);
-        }*/
+        /*efi_loader::console::print(u"[MEM] Preparing paging structures...\n\r");*/
     }
     /*efi_loader::console::print(
         u"[EFI] Bootloader done. Giving up EFI boot services and invoking the kernel.\n\r");*/
