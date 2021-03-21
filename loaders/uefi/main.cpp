@@ -68,8 +68,8 @@ extern "C" efi_loader::EFI_STATUS efi_main(
         auto initrd = efi_loader::load_file(config["initrd"]);
 
         efi_loader::console::print(u"[MEM] Allocating memory regions...\n\r");
-        auto kernel_region = efi_loader::allocate_pages(kernel.size, 0x80000000);
-        auto initrd_region = efi_loader::allocate_pages(initrd.size, 0x80000001);
+        auto kernel_region = efi_loader::allocate_pages(kernel.size, efi_loader::EFI_MEMORY_TYPE::reaveros_kernel);
+        auto initrd_region = efi_loader::allocate_pages(initrd.size, efi_loader::EFI_MEMORY_TYPE::reaveros_initrd);
 
         std::memcpy(kernel_region, kernel.buffer.get(), kernel.size);
         std::memcpy(initrd_region, initrd.buffer.get(), initrd.size);
