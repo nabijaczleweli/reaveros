@@ -21,8 +21,6 @@
 
 namespace crypto
 {
-
 /// Compute a CRC32 but treat some range as if it were zeros.
 std::uint32_t crc32le_hole(std::uint8_t * data, std::size_t len, std::size_t skip_offset, std::size_t skip_length);
-
 }

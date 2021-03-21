@@ -26,16 +26,18 @@
 #include "efi/video_mode.h"
 
 #include <cstring>
+#include <crypto/crc32.h>
 
 extern "C" efi_loader::EFI_STATUS efi_main(
     efi_loader::EFI_HANDLE image_handle,
     efi_loader::EFI_SYSTEM_TABLE * system_table)
 {
     {
-        if (system_table->header.signature != efi_loader::EFI_SYSTEM_TABLE_SIGNATURE)
+        if (system_table->header.signature != efi_loader::EFI_SYSTEM_TABLE_SIGNATURE ||
+            (~crypto::crc32le_hole(reinterpret_cast<std::uint8_t *>(system_table), sizeof(*system_table),
+                                   offsetof(efi_loader::EFI_SYSTEM_TABLE, header.crc32), sizeof(system_table->header.crc32))) != system_table->header.crc32)
         {
             // need a better way to handle this
-            // probably also need a crc32 check, but fuck that right now
             *(volatile std::uint64_t *)nullptr = 0xdeadbeef;
             efi_loader::halt();
         }

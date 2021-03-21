@@ -25,6 +25,7 @@ add_executable(loader-uefi-elf
 
 target_link_libraries(loader-uefi-elf
     freestanding
+    crypto
 )
 
 set(linker_script ${CMAKE_CURRENT_SOURCE_DIR}/loader.lds)
