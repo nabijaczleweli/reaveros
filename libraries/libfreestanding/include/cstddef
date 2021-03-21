@@ -16,6 +16,8 @@
 
 #pragma once
 
+#define offsetof(type, member) reinterpret_cast<std::size_t>(&(static_cast<type *>(nullptr))->member)
+
 namespace std
 {
 using size_t = decltype(sizeof(0));
