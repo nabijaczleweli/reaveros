@@ -70,6 +70,7 @@ enum class EFI_MEMORY_TYPE : std::uint32_t
 
     reaveros_kernel = 0x80000000,
     reaveros_initrd = 0x80000001,
+    reaveros_framebuffer = 0x80000002,
 };
 
 struct EFI_TIME

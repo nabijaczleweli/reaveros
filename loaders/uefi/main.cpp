@@ -28,6 +28,17 @@
 #include <cstring>
 #include <crypto/crc32.h>
 
+#define efi_assert(cond) \
+    do \
+    { \
+        if (!(cond)) \
+        { \
+            efi_loader::console::print(u"[ERR] ", u###cond, u" = ", (cond), u"!\n\r"); \
+            efi_loader::halt(); \
+        } \
+    } \
+    while(false)
+
 extern "C" efi_loader::EFI_STATUS efi_main(
     efi_loader::EFI_HANDLE image_handle,
     efi_loader::EFI_SYSTEM_TABLE * system_table)
@@ -61,6 +72,7 @@ extern "C" efi_loader::EFI_STATUS efi_main(
         if (video_mode.valid) {
             efi_loader::console::print(u"[GFX] Setting video mode...\n\r");
             efi_loader::set_mode(video_mode);
+            efi_assert(video_mode.frame_buffer_size);
         }
 
         efi_loader::console::print(u"[DSK] Loading kernel and initrd...\n\r");
@@ -70,6 +82,8 @@ extern "C" efi_loader::EFI_STATUS efi_main(
         efi_loader::console::print(u"[MEM] Allocating memory regions...\n\r");
         auto kernel_region = efi_loader::allocate_pages(kernel.size, efi_loader::EFI_MEMORY_TYPE::reaveros_kernel);
         auto initrd_region = efi_loader::allocate_pages(initrd.size, efi_loader::EFI_MEMORY_TYPE::reaveros_initrd);
+        if (video_mode.valid)
+            efi_loader::allocate_pages(video_mode.frame_buffer_size, efi_loader::EFI_MEMORY_TYPE::reaveros_framebuffer);
 
         std::memcpy(kernel_region, kernel.buffer.get(), kernel.size);
         std::memcpy(initrd_region, initrd.buffer.get(), initrd.size);
@@ -83,6 +97,5 @@ extern "C" efi_loader::EFI_STATUS efi_main(
         u"[EFI] Bootloader done. Giving up EFI boot services and invoking the kernel.\n\r");*/
 
     *(volatile std::uint64_t *)nullptr = 0xdeadc0de;
-    for (;;)
-        ;
+    efi_loader::halt();
 }

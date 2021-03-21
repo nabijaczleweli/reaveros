@@ -237,16 +237,18 @@ video_mode choose_mode(const config & cfg)
     return { true, preferred_index };
 }
 
-void set_mode(const video_mode & mode)
+void set_mode(video_mode & mode)
 {
     switch (auto status = proto->set_mode(proto, mode.mode_number))
     {
         case EFI_SUCCESS:
-            return;
+            break;
 
         default:
             console::print(u" > Failed to set video mode: ", status, u".\r\n");
-            return;
+            break;
     }
+
+    mode.frame_buffer_size = proto->mode->frame_buffer_size;
 }
 }

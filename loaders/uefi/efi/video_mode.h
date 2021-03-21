@@ -27,8 +27,9 @@ struct video_mode
 {
     bool valid = false;
     std::uint32_t mode_number;
+    std::size_t frame_buffer_size;
 };
 
 video_mode choose_mode(const config & cfg);
-void set_mode(const video_mode & mode);
+void set_mode(video_mode & mode);
 }
