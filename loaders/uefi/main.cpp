@@ -37,9 +37,7 @@ extern "C" efi_loader::EFI_STATUS efi_main(
             (~crypto::crc32le_hole(reinterpret_cast<std::uint8_t *>(system_table), sizeof(*system_table),
                                    offsetof(efi_loader::EFI_SYSTEM_TABLE, header.crc32), sizeof(system_table->header.crc32))) != system_table->header.crc32)
         {
-            // need a better way to handle this
-            *(volatile std::uint64_t *)nullptr = 0xdeadbeef;
-            efi_loader::halt();
+            efi_loader::reboot();
         }
 
         efi_loader::initialize(system_table, image_handle);

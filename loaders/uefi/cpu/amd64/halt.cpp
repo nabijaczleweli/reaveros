@@ -22,4 +22,11 @@ namespace efi_loader::inline amd64
     asm volatile("cli; hlt");
     __builtin_unreachable();
 }
+
+[[noreturn]] void reboot() {
+    std::uint64_t idt[3]{};
+    asm volatile("lidt %0" :: "m"(idt));
+    asm volatile("int3"); // 3 = triple fault
+    __builtin_unreachable();
+}
 }

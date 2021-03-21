@@ -17,4 +17,5 @@
 namespace efi_loader::inline amd64
 {
 [[noreturn]] void halt();
+[[noreturn]] void reboot();
 }
