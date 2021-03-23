@@ -107,6 +107,8 @@ struct memory_map {
 	std::size_t count;
 };
 memory_map get_memory_map();
+
+void exit(std::uintptr_t key);
 }
 
 #define PROTO_GUID(PROTO) EFI_##PROTO##_PROTOCOL_GUID

@@ -95,8 +95,10 @@ extern "C" efi_loader::EFI_STATUS efi_main(
 
     efi_loader::console::print(u"[MEM] Getting memory map...\n\r");
     auto memory_map = efi_loader::get_memory_map();
-    /*efi_loader::console::print(
-        u"[EFI] Bootloader done. Giving up EFI boot services and invoking the kernel.\n\r");*/
+
+    efi_loader::console::print(
+        u"[EFI] Bootloader done. Giving up EFI boot services and invoking the kernel.\n\r");
+    efi_loader::exit(memory_map.key);
 
     *(volatile std::uint64_t *)nullptr = 0xdeadc0de;
     efi_loader::halt();

@@ -39,6 +39,8 @@ using EFI_ALLOCATE_POOL = EFIAPI EFI_STATUS (*)(EFI_MEMORY_TYPE, std::size_t, vo
 
 using EFI_FREE_POOL = EFIAPI EFI_STATUS (*)(void *);
 
+using EFI_EXIT_BOOT_SERVICES = EFIAPI EFI_STATUS (*)(EFI_HANDLE, std::uintptr_t);
+
 using EFI_CREATE_EVENT = void (*)();
 using EFI_SET_TIMER = void (*)();
 using EFI_WAIT_FOR_EVENT = void (*)();
@@ -57,7 +59,6 @@ using EFI_IMAGE_LOAD = void (*)();
 using EFI_IMAGE_START = void (*)();
 using EFI_EXIT = void (*)();
 using EFI_IMAGE_UNLOAD = void (*)();
-using EFI_EXIT_BOOT_SERVICES = void (*)();
 using EFI_GET_NEXT_MONOTONIC_COUNT = void (*)();
 using EFI_STALL = void (*)();
 using EFI_SET_WATCHDOG_TIMER = void (*)();
@@ -302,6 +303,19 @@ memory_map get_memory_map()
     }
 
     return {key, kernel_map, count};
+}
+
+void exit(std::uintptr_t key)
+{
+    switch (auto status = system_table->boot_services->exit_boot_services(image_handle, key))
+    {
+        case EFI_SUCCESS:
+            return;
+
+        default:
+            // Nominally, we could re-acquire the key; but if we do get here, this means we severely fricked up!!
+            reboot();
+    }
 }
 }
 
