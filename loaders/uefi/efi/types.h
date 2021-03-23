@@ -18,6 +18,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <reaveros/loader/memory_map.h>
 
 namespace efi_loader
 {
@@ -68,9 +69,9 @@ enum class EFI_MEMORY_TYPE : std::uint32_t
     efi_persistent_memory,
     efi_max_memory_type,
 
-    reaveros_kernel = 0x80000000,
-    reaveros_initrd = 0x80000001,
-    reaveros_framebuffer = 0x80000002,
+    reaveros_kernel = static_cast<std::uint32_t>(reaveros::loader::memory_type::reaveros_kernel),
+    reaveros_initrd = static_cast<std::uint32_t>(reaveros::loader::memory_type::reaveros_initrd),
+    reaveros_framebuffer = static_cast<std::uint32_t>(reaveros::loader::memory_type::reaveros_framebuffer),
 };
 
 struct EFI_TIME
