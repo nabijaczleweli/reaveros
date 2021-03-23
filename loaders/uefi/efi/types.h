@@ -74,6 +74,17 @@ enum class EFI_MEMORY_TYPE : std::uint32_t
     reaveros_framebuffer = static_cast<std::uint32_t>(reaveros::loader::memory_type::reaveros_framebuffer),
 };
 
+using EFI_VIRTUAL_ADDRESS = std::uint64_t;
+using EFI_PHYSICAL_ADDRESS = std::uint64_t;
+
+struct EFI_MEMORY_DESCRIPTOR {
+    std::uint32_t type;
+    EFI_PHYSICAL_ADDRESS physical_start;
+    EFI_VIRTUAL_ADDRESS virtual_start;
+    std::uint64_t number_of_pages;
+    std::uint64_t attribute;
+};
+
 struct EFI_TIME
 {
     std::uint16_t year;  // 1900 – 9999

@@ -19,6 +19,7 @@
 #include "console.h"
 #include "system_table.h"
 #include "types.h"
+#include <cstring>
 
 namespace efi_loader
 {
@@ -32,7 +33,7 @@ using EFI_ALLOCATE_PAGES = EFIAPI EFI_STATUS (*)(EFI_ALLOCATE_TYPE, EFI_MEMORY_T
 
 using EFI_FREE_PAGES = void (*)();
 
-using EFI_GET_MEMORY_MAP = void (*)();
+using EFI_GET_MEMORY_MAP = EFIAPI EFI_STATUS (*)(std::size_t *, EFI_MEMORY_DESCRIPTOR *, std::uintptr_t *, std::size_t *, std::uint32_t *);
 
 using EFI_ALLOCATE_POOL = EFIAPI EFI_STATUS (*)(EFI_MEMORY_TYPE, std::size_t, void **);
 
@@ -69,6 +70,21 @@ constexpr auto EFI_OPEN_PROTOCOL_TEST_PROTOCOL = 0x00000004;
 constexpr auto EFI_OPEN_PROTOCOL_BY_CHILD_CONTROLLER = 0x00000008;
 constexpr auto EFI_OPEN_PROTOCOL_BY_DRIVER = 0x00000010;
 constexpr auto EFI_OPEN_PROTOCOL_EXCLUSIVE = 0x00000020;
+
+constexpr auto EFI_MEMORY_UC = 0x0000000000000001;
+constexpr auto EFI_MEMORY_WC = 0x0000000000000002;
+constexpr auto EFI_MEMORY_WT = 0x0000000000000004;
+constexpr auto EFI_MEMORY_WB = 0x0000000000000008;
+constexpr auto EFI_MEMORY_UCE = 0x0000000000000010;
+constexpr auto EFI_MEMORY_WP = 0x0000000000001000;
+constexpr auto EFI_MEMORY_RP = 0x0000000000002000;
+constexpr auto EFI_MEMORY_XP = 0x0000000000004000;
+constexpr auto EFI_MEMORY_NV = 0x0000000000008000;
+constexpr auto EFI_MEMORY_MORE_RELIABLE = 0x0000000000010000;
+constexpr auto EFI_MEMORY_RO = 0x0000000000020000;
+constexpr auto EFI_MEMORY_SP = 0x0000000000040000;
+constexpr auto EFI_MEMORY_CPU_CRYPTO = 0x0000000000080000;
+constexpr auto EFI_MEMORY_RUNTIME = 0x8000000000000000;
 
 using EFI_OPEN_PROTOCOL = EFIAPI EFI_STATUS (*)(
     EFI_HANDLE handle,
@@ -204,6 +220,88 @@ void * allocate_pages(std::size_t size, EFI_MEMORY_TYPE type)
             console::print(u"[ERR] Error allocating pages: ", status & ~high_bit, u".\n\r");
             halt();
     }
+}
+
+memory_map get_memory_map()
+{
+    std::size_t size{};
+    std::size_t desc_size;
+    std::uint32_t desc_ver;
+    std::uintptr_t key;
+    switch (auto status = system_table->boot_services->get_memory_map(&size, nullptr, &key, &desc_size, &desc_ver))
+    {
+        case EFI_BUFFER_TOO_SMALL:
+            break;
+
+        default:
+            console::print(u"[ERR] Error getting memory map size: ", status & ~high_bit, u".\n\r");
+            halt();
+    }
+
+    // UEFI 2.8, p. 168:
+    // The actual size of the buffer allocated for the consequent call to GetMemoryMap() should be bigger
+    // then the value returned in MemoryMapSize, since allocation of the new buffer may potentially increase memory map size.
+    size *= 2;
+    auto count = size / desc_size;
+    const auto kernel_map = new reaveros::loader::memory_map[count];
+    std::memset(kernel_map, 0, sizeof(reaveros::loader::memory_map) * count);
+
+    auto map = operator new(size);
+    switch (auto status = system_table->boot_services->get_memory_map(&size, reinterpret_cast<EFI_MEMORY_DESCRIPTOR *>(map), &key, &desc_size, &desc_ver))
+    {
+        case EFI_SUCCESS:
+            break;
+
+        default:
+            console::print(u"[ERR] Error getting memory map size: ", status & ~high_bit, u".\n\r");
+            halt();
+    }
+    count = size / desc_size;
+
+    console::print(u" > size: ", desc_size, u" vs ", sizeof(EFI_MEMORY_DESCRIPTOR), u" for ", count, u" entries; ver=", desc_ver, u"; key=", key, u"\n\r");
+    for (std::size_t i = 0; i < count; ++i)
+    {
+        auto & block = *reinterpret_cast<EFI_MEMORY_DESCRIPTOR *>(reinterpret_cast<char *>(map) + desc_size * i);
+        auto & result = kernel_map[i];
+
+        console::print(u" > ", i, " @ ", &block,
+                       u"; tp=", (void *)(std::uintptr_t)block.type,
+                       u"; phys=", (void *)block.physical_start,
+                       u"; log=", (void *)block.virtual_start,
+                       u"; attr=", (void *)block.attribute,
+                       u"; cnt=", block.number_of_pages, u"\n\r");
+        result.type = static_cast<reaveros::loader::memory_type>(block.type);
+        result.start_physical = block.physical_start;
+        result.start_virtual = block.virtual_start;
+        result.count = block.number_of_pages;
+
+        if (block.attribute & EFI_MEMORY_UC)
+            result.cacheability |= reaveros::loader::memory_cacheability::not_cacheable;
+        if (block.attribute & EFI_MEMORY_WC)
+            result.cacheability |= reaveros::loader::memory_cacheability::write_combining;
+        if (block.attribute & EFI_MEMORY_WT)
+            result.cacheability |= reaveros::loader::memory_cacheability::write_through;
+        if (block.attribute & EFI_MEMORY_WB)
+            result.cacheability |= reaveros::loader::memory_cacheability::write_back;
+        if (block.attribute & EFI_MEMORY_UCE)
+            result.cacheability |= reaveros::loader::memory_cacheability::not_cacheable_exported_fetch_and_add;
+
+        if (block.attribute & EFI_MEMORY_WP)
+            result.protection |= reaveros::loader::memory_protection::write_protect;
+        if (block.attribute & EFI_MEMORY_RP)
+            result.protection |= reaveros::loader::memory_protection::read_protect;
+        if (block.attribute & EFI_MEMORY_XP)
+            result.protection |= reaveros::loader::memory_protection::execute_protect;
+        if (block.attribute & EFI_MEMORY_RO)
+            result.protection |= reaveros::loader::memory_protection::read_only;
+
+        result.specific_purpose = block.attribute & EFI_MEMORY_SP;
+        result.crypto = block.attribute & EFI_MEMORY_CPU_CRYPTO;
+        result.non_volatile = block.attribute & EFI_MEMORY_NV;
+        result.need_runtime_mapping = block.attribute & EFI_MEMORY_RUNTIME;
+    }
+
+    return {key, kernel_map, count};
 }
 }
 

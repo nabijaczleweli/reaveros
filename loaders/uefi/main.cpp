@@ -21,7 +21,6 @@
 #include "efi/console.h"
 #include "efi/efi.h"
 #include "efi/filesystem.h"
-#include "efi/memory_map.h"
 #include "efi/system_table.h"
 #include "efi/video_mode.h"
 
@@ -93,6 +92,9 @@ extern "C" efi_loader::EFI_STATUS efi_main(
 
         /*efi_loader::console::print(u"[MEM] Preparing paging structures...\n\r");*/
     }
+
+    efi_loader::console::print(u"[MEM] Getting memory map...\n\r");
+    auto memory_map = efi_loader::get_memory_map();
     /*efi_loader::console::print(
         u"[EFI] Bootloader done. Giving up EFI boot services and invoking the kernel.\n\r");*/
 

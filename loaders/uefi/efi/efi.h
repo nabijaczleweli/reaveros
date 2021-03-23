@@ -17,6 +17,7 @@
 #pragma once
 
 #include <climits>
+#include <reaveros/loader/memory_map.h>
 
 #ifndef EFIAPI
 #ifdef _MSC_EXTENSIONS
@@ -97,6 +98,15 @@ void * open_protocol_by_guid(EFI_HANDLE, const EFI_GUID &, const char *);
 void * open_protocol_by_guid(const EFI_GUID &, const char *);
 
 void * allocate_pages(std::size_t, EFI_MEMORY_TYPE type);
+
+
+struct memory_map {
+	std::uintptr_t key;
+
+	reaveros::loader::memory_map * kernel_map;
+	std::size_t count;
+};
+memory_map get_memory_map();
 }
 
 #define PROTO_GUID(PROTO) EFI_##PROTO##_PROTOCOL_GUID
